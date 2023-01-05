@@ -1,0 +1,281 @@
+---
+author: "Kashish Gujral"
+title: "Street or Road"
+date: "October 16, 2020"
+output: html_notebook
+---
+```{r}
+library(DataComputing)
+library(mosaic)
+library(knitr)
+```
+
+```{r}
+# Data Resources - North Carolina
+# 15000 street addresses of registered voters in Wake County, North Carolina
+Addresses <- mosaic::read.file("http://tiny.cc/dcf/street-addresses.csv")
+
+#sample few dozen cases
+Sample <- 
+  Addresses %>%
+  sample_n(size = 50)
+```
+
+```{r}
+# 1. The PO Box cases tend to have a substring "PO"
+# 2. the regular expression for "PO" is simply `"PO"`
+# 3. Find some cases that match:
+Matches <- 
+  Sample %>%
+  filter(grepl("PO", address))
+```
+
+```{r}
+# 4. Find cases that don't match
+Dont <- 
+  Sample %>%
+  filter( ! grepl("PO", address))
+```
+
+```{r}
+# 5. Find cases of `Matches` that we don't want to match, 
+# and find cases of `Dont` that we should have matched.
+# Inspect Matches
+head(Matches)
+
+# Inspect Dont
+head(Dont)
+
+# 6. Maybe "BOX" might be a better pattern, 
+# so we'll try that instead.
+# Pattern to locate
+pattern <- "BOX\\s+(\\d+)"
+
+# Inspect Matches
+Matches <- 
+  Sample %>%
+  filter(grepl(pattern, address))
+
+Matches
+
+# Inspect Dont
+Dont <- 
+  Sample %>%
+  filter( ! grepl(pattern, address))
+
+Dont
+```
+
+```{r}
+# We'll now use `tidyr::extract()` to pull 
+# the part of the pattern identified by the extraction parenthesis.
+BoxNumbers <- 
+  Sample %>%
+  filter(grepl(pattern, address)) %>%
+  tidyr::extract(address, into = "boxnum", regex = pattern)
+
+head(BoxNumbers, 10)
+
+```
+
+
+```{r}
+Pattern <-
+  Addresses %>%
+  filter(grepl(pattern, address))%>%
+  tidyr::extract(address, into = "ending" , regex = pattern)
+
+PopularAddressNames <-
+  count(Endings, ending) %>%
+  arrange(desc(n))
+
+head(PopularAddressNames, 15)
+```
+
+```{r}
+# Back to the Streets
+# We'll go line-by-line explaining the following code chunk:
+pattern <- "(ST|RD|ROAD)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+
+```
+
+
+1-12
+```{r}
+pattern <- "(Lane|Ave|Dr)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+2-12
+```{r}
+pattern <- "(ST|RD)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address)) #remove some obs we dont want (eg apartments)
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+3-12
+```{r}
+pattern <- "(AVE|DRIVE|ROAD)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+4-12
+```{r}
+pattern <- "(AVE|DRIVE)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+5-12
+```{r}
+pattern <- "(EST|Lane)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address)) #remove some obs we dont want (eg apartments)
+          
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+6-12
+```{r}
+pattern <- "(ST|EST|Lane)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+7-12
+```{r}
+pattern <- "(Estate | St)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address)) #remove some obs we dont want (eg apartments)
+          
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+8-12
+```{r}
+pattern <- "(Ave|Dr)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+9-12
+```{r}
+pattern <- "(Ave|Dr)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+10-12
+```{r}
+pattern <- "(PKWY|Dr)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address))#remove some obs we dont want (eg apartments)
+          
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+11-12
+```{r}
+pattern <- "(PKWY|Dr| STREET)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+
+12-12
+```{r}
+pattern <- "(PATH|PLACE)"  #regular expression we want to extract that is a pttern
+
+LeftOvers <- #its a new data frame that will store what remains
+  Addresses %>% #its the data with what we start with ie. it is our starting point
+  filter( ! grepl(pattern, address), #finds what doesnt matxh the pattern
+          ! grepl("\\sAPT|UNIT\\s[\\d]+$", address), #remove some obs we dont want (eg apartments)
+          ! grepl("BOX|BX", address)) #remove box an bx from the data
+
+# Inspect the result
+head(LeftOvers, 10)
+```
+```{r}
+PopularAddressNames %>%
+  ggplot(aes(x = reorder(ending, -n) , y = n)) +
+  geom_bar(stat = 'identity' , fill = 'green') +
+  labs(x = "Street name ending" , y = "count")
+```
+
